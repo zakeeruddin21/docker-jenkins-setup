@@ -64,22 +64,31 @@ Vagrant.configure("2") do |config|
   # Puppet, Chef, Ansible, Salt, and Docker are also available. Please see the
   # documentation for more information about their specific syntax and use.
   config.vm.provision "shell", inline: <<-SHELL
-    sudo yum update -y
-    sudo yum install java-1.8.0 -y
+  # Creating user jenkins
+  useradd -m -d /home/jenkins -s /bin/bash jenkins
 
-    sudo wget -O /etc/yum.repos.d/jenkins.repo https://pkg.jenkins.io/redhat-stable/jenkins.repo
-    sudo rpm --import https://pkg.jenkins.io/redhat-stable/jenkins.io.key
+  # Creating group jenkins
+  groupadd jenkins
 
-    sudo yum install jenkins -y
-    sudo service jenkins start
-    sudo chkconfig jenkins on
-    sleep 15
-    echo "******************************************"
-    export initialAdminPassword=`sudo cat /var/lib/jenkins/secrets/initialAdminPassword`
-    echo "initialAdminPassword is: ${initialAdminPassword}"
-    echo "******************************************"
+  # Adding jenkins user to sudoer group
+  usermod -aG wheel jenkins
 
-    echo "You can find initialAdminPassword at /var/lib/jenkins/secrets/initialAdminPassword"
+  yum update -y
+  yum install java-1.8.0 -y
+
+  wget -O /etc/yum.repos.d/jenkins.repo https://pkg.jenkins.io/redhat-stable/jenkins.repo
+  rpm --import https://pkg.jenkins.io/redhat-stable/jenkins.io.key
+
+  yum install jenkins -y
+  service jenkins start
+  chkconfig jenkins on
+  sleep 15
+  echo "******************************************"
+  export initialAdminPassword=`cat /var/lib/jenkins/secrets/initialAdminPassword`
+  echo "initialAdminPassword is: ${initialAdminPassword}"
+  echo "******************************************"
+
+  echo "You can find initialAdminPassword at /var/lib/jenkins/secrets/initialAdminPassword"
 
   SHELL
 end
